@@ -1,0 +1,16 @@
+<view class="container">
+  <view class="card-list">
+    <block wx:for="{{cards}}" wx:key="index">
+      <view class="card">
+        <view class="card-content">
+          <block wx:for="{{item.sections}}" wx:key="index" wx:for-item="section">
+            <view class="section">
+              <view class="title">{{section.title}}</view>
+              <view class="content">{{section.content}}</view>
+            </view>
+          </block>
+        </view>
+      </view>
+    </block>
+  </view>
+</view>
