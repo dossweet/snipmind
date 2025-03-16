@@ -1,0 +1,15 @@
+{
+    "name": "getMarkdownSections",
+    "version": "1.0.0",
+    "description": "将Markdown文档分成两个合理的部分",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "wx-server-sdk": "~2.6.3",
+        "axios": "^1.6.2"
+    }
+}

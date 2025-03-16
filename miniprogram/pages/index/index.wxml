@@ -1,16 +1,97 @@
-<view class="container">
-  <view class="card-list">
-    <block wx:for="{{cards}}" wx:key="index">
-      <view class="card">
-        <view class="card-content">
-          <block wx:for="{{item.sections}}" wx:key="index" wx:for-item="section">
-            <view class="section">
-              <view class="title">{{section.title}}</view>
-              <view class="content">{{section.content}}</view>
-            </view>
-          </block>
+<import src="index.skeleton.wxml"/>
+<view wx:if="{{!pageLoading}}" class="container {{showCards ? 'showCards' : ''}}" >
+  <!-- 用户信息区域 -->
+  <view class="user-info" bindtap="getUserInfo">
+    <image class="user-avatar" src="{{userInfo.avatarUrl || '/assets/home-selected.png'}}"></image>
+    <text wx:if="{{!showCards}}" class="user-nickname" bindtap="getUserProfile">{{userInfo.nickName || '点击登录'}}</text>
+    <text wx:if="{{showCards}}" class="user-tips">{{'温馨提示: 点击logo可以返回输入态'}}</text>
+  </view>
+
+  <!-- 标题区域，始终显示，添加点击事件 -->
+  <view class="title" bindtap="onTitleClick">SnipMind</view>
+
+  <!-- 输入表单区域，提交后隐藏 -->
+  <view class="input-form" hidden="{{showCards}}">
+    <view class="input-container" >
+      <textarea class="content-input" placeholder="请输入markdown格式的文章内容.." placeholder-class="placeholder-style" bindinput="onContentInput" value="{{content}}" maxlength="-1" auto-height="{{false}}"></textarea>
+      <textarea wx:if="{{showExampleContent}}" class="example-content content-input" bindtap="onExampleContentTap" value="{{exampleContent}}" maxlength="{{-1}}"></textarea>
+    </view>
+
+    <view class="button-wrapper">
+      <view class="custom-button" bindtap="onSubmit" hover-class="button-hover">提交</view>
+    </view>
+  </view>
+
+  <!-- 轮播卡片区域，默认隐藏，提交后显示 -->
+  <view class="carousel-container" hidden="{{!showCards}}">
+    <swiper class="stacked-swiper" current="{{current}}" bindchange="onSwiperChange" circular="{{true}}" previous-margin="0" next-margin="0">
+      <swiper-item wx:for="{{cardList}}" wx:key="index">
+        <view id="towxml-container-{{index}}" class="card {{current === index ? 'active' : ''}}" style="transform: scale({{current === index ? 1 : 0.95}});">
+          <view class="towxml-container">
+            <!-- <rich-text nodes="{{item.richText}}"></rich-text> -->
+            <towxml nodes="{{item.section}}" />
+          </view>
+          <!-- 添加复制图标 -->
+          <view class="copy-icon" bindtap="copyCardContent" data-index="{{index}}">
+            <text class="iconfont icon-copy"></text>
+          </view>
+          <!-- 添加下载图标 -->
+          <view class="download-icon" bindtap="downloadCardImage" data-index="{{index}}">
+            <text class="iconfont icon-download"></text>
+          </view>
+          <!-- 添加自定义radio按钮 -->
+          <view class="custom-radio {{item.selected ? 'selected' : ''}}" bindtap="toggleCardSelection" data-index="{{index}}">
+            <view class="checkmark" wx:if="{{item.selected}}"></view>
+          </view>
+        </view>
+      </swiper-item>
+    </swiper>
+    <view class="indicator-dots">
+      <block wx:if="{{cardList.length <= 5}}">
+        <view wx:for="{{cardList}}" wx:key="index" class="dot {{current === index ? 'active' : ''}}" bindtap="switchToCard" data-index="{{index}}">
+        </view>
+      </block>
+      <block wx:else>
+        <view wx:for="{{[0, 1, 2, 3, 4]}}" wx:key="*this" class="dot {{index === activeDotIndex ? 'active' : ''}}" bindtap="switchToIndicator" data-index="{{index}}">
+        </view>
+      </block>
+    </view>
+
+    <!-- 添加复制和分享按钮 -->
+    <view class="action-buttons">
+      <button class="action-button copy-button" bindtap="onCopy">复制</button>
+      <button class="action-button share-button" bindtap="onShare">分享</button>
+    </view>
+  </view>
+
+  <view class="footer">@Powered by Coding101</view>
+
+  <!-- 自定义分享面板 -->
+  <view class="share-panel" wx:if="{{showSharePanel}}">
+    <view class="share-panel-mask" bindtap="hideSharePanel"></view>
+    <view class="share-panel-content">
+      <view class="share-options">
+        <view class="share-option" bindtap="generateWholePicture">
+          <image class="share-option-icon picture-icon" src="/assets/picture.png"></image>
+          <view class="share-option-text">生成长图</view>
+        </view>
+        <view class="share-option">
+          <button class="share-option-btn" open-type="share">分享给好友</button>
+          <image class="share-option-icon friend-icon" src="/assets/friends.png"></image>
+          <view class="share-option-text">发送好友</view>
+        </view>
+        <view class="share-option" bindtap="copyLink">
+          <image class="share-option-icon link-icon" src="/assets/link.png"></image>
+          <view class="share-option-text">复制链接</view>
         </view>
       </view>
-    </block>
+      <view class="share-cancel" bindtap="hideSharePanel">取消</view>
+    </view>
   </view>
+</view>
+<template is="skeleton" wx:if="{{pageLoading}}" />
+<!-- 隐藏的画布，用于生成图片 -->
+<view>
+  <canvas canvas-id="canvasArea" id="canvasArea" style="position:absolute; width: {{canvasWidth}}px; height: {{canvasHeight}}px; padding-right: 20px; opacity: 100;"></canvas>
+  <canvas canvas-id="myCanvas" id="myCanvas" style="position:absolute; width: {{canvasWidth}}px; height: {{canvasHeight}}px;  padding-right: 20px; opacity: 100; z-index: 9;"></canvas>
 </view>
